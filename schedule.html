@@ -19,6 +19,8 @@ button#loginBtn:hover {background:#162a4a;}
 .logout {position:absolute; top:12px; right:20px; background:#c00000; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; z-index:50;}
 .logout:hover {background:#a00000;}
 .fc {font-family: inherit;}
+.fc-timegrid-slot-label-cushion {font-size: 11px !important;}
+.fc-col-header-cell-cushion {font-size: 11px !important;}
 </style>
 </head>
 <body>
@@ -101,7 +103,7 @@ button#loginBtn:hover {background:#162a4a;}
     window.cal = new FullCalendar.Calendar(calEl, {
       initialView: 'timeGridWeek',
       slotMinTime: '07:00:00',
-      slotMaxTime: '20:00:00',
+      slotMaxTime: '19:00:00',
       allDaySlot: false,
       locale: 'ru',
       localeCode: 'ru',
