@@ -88,6 +88,18 @@ button#loginBtn:hover {background:#007e75;}
     const pw = document.getElementById('pw-' + user).value;
     if (PASSWORDS[user] && pw === PASSWORDS[user]) {
       currentUser = user;
+      // Ivan-only visit-change check
+      if (user === 'Иван') {
+        const prev = localStorage.getItem('last_ivan_visit');
+        const allEvents = ['Иван','Марина','Оля','Аня'].flatMap(u => { try { return JSON.parse(localStorage.getItem('cal_'+u) || '[]'); } catch(e){ return []; } });
+        const hash = JSON.stringify(allEvents.map(e=>e.title+e.start).sort());
+        if (!prev || prev !== hash) {
+          alert('Были изменения с последнего посещения');
+        } else {
+          alert('Изменений не было');
+        }
+        localStorage.setItem('last_ivan_visit', hash);
+      }
       loginScreen.style.display = 'none';
       app.style.display = 'block';
       logoutBtn.style.display = 'inline-block';
