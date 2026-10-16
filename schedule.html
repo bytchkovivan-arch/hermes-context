@@ -130,10 +130,10 @@ button#loginBtn:hover {background:#162a4a;}
           allEvents = load(currentUser);
         }
         return allEvents.map(e => ({
-          title: e.title,
-          start: e.start ? e.start.toISOString() : null,
-          end: e.end ? e.end.toISOString() : null,
-          allDay: e.allDay,
+      title: e.title,
+      start: e.start,
+      end: e.end,
+      allDay: e.allDay,
           color: e.owner ? (e.owner === 'Иван' ? '#1f3864' : e.owner === 'Марина' ? '#c00000' : e.owner === 'Оля' ? '#008040' : '#e2a600') : undefined,
           extendedProps: { owner: e.owner ?? currentUser }
         }));
