@@ -76,14 +76,14 @@ button#loginBtn:hover {background:#162a4a;}
   loginBtn.addEventListener('click', () => {
     const user = document.querySelector('input[name="user"]:checked').value;
     const pw = document.getElementById('pw-' + user).value;
-    if (PASSWORDS[role] && pw === PASSWORDS[role]) {
+    if (PASSWORDS[user] && pw === PASSWORDS[user]) {
       currentUser = user;
       loginScreen.style.display = 'none';
       app.style.display = 'block';
       logoutBtn.style.display = 'inline-block';
       init();
     } else {
-      alert('Неверный пароль для выбранной роли');
+      alert('Неверный пароль для пользователя');
     }
   });
 
@@ -119,21 +119,21 @@ button#loginBtn:hover {background:#162a4a;}
         const title = prompt('Название события');
         if (title) {
           window.cal.addEvent({ title, start: info.dateStr, allDay: info.allDay });
-          save(currentRole, window.cal.getEvents());
+          save(currentUser, window.cal.getEvents());
         }
       },
       eventClick: info => {
         const t = prompt('Редактировать: ' + info.event.title, info.event.title);
         if (t === null) return;
         if (t.trim() === '') {
-          if (confirm('Удалить?')) { info.event.remove(); save(currentRole, window.cal.getEvents()); }
+          if (confirm('Удалить?')) { info.event.remove(); save(currentUser, window.cal.getEvents()); }
         } else {
           info.event.setProp('title', t);
-          save(currentRole, window.cal.getEvents());
+          save(currentUser, window.cal.getEvents());
         }
       },
-      eventDrop: () => save(currentRole, window.cal.getEvents()),
-      eventResize: () => save(currentRole, window.cal.getEvents())
+      eventDrop: () => save(currentUser, window.cal.getEvents()),
+      eventResize: () => save(currentUser, window.cal.getEvents())
     });
     window.cal.render();
   }
