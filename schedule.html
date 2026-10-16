@@ -71,7 +71,13 @@ button#loginBtn:hover {background:#162a4a;}
   }
 
   function save(user, evs) {
-    const arr = evs.map(e => ({ title: e.title, start: e.start ? e.start.toISOString() : null, end: e.end ? e.end.toISOString() : null, allDay: e.allDay }));
+    const arr = evs.map(e => ({
+      title: e.title,
+      start: e.start ? e.start.toISOString() : null,
+      end: e.end ? e.end.toISOString() : null,
+      allDay: e.allDay,
+      owner: e.extendedProps?.owner ?? user
+    }));
     localStorage.setItem(key(user), JSON.stringify(arr));
   }
 
@@ -116,11 +122,26 @@ button#loginBtn:hover {background:#162a4a;}
       selectable: true,
       selectMirror: true,
       dayMaxEvents: true,
-      events: load(currentUser).map(e => ({ ...e, allDay: e.allDay || false })),
+      events: (() => {
+        let allEvents = [];
+        if (currentUser === 'Иван' || currentUser === 'Марина') {
+          ['Иван', 'Марина', 'Оля', 'Аня'].forEach(u => allEvents.push(...load(u)));
+        } else {
+          allEvents = load(currentUser);
+        }
+        return allEvents.map(e => ({
+          title: e.title,
+          start: e.start ? e.start.toISOString() : null,
+          end: e.end ? e.end.toISOString() : null,
+          allDay: e.allDay,
+          color: e.owner ? (e.owner === 'Иван' ? '#1f3864' : e.owner === 'Марина' ? '#c00000' : e.owner === 'Оля' ? '#008040' : '#e2a600') : undefined,
+          extendedProps: { owner: e.owner ?? currentUser }
+        }));
+      })(),
       dateClick: info => {
         const title = prompt('Название события');
         if (title) {
-          window.cal.addEvent({ title, start: info.dateStr, allDay: info.allDay });
+          window.cal.addEvent({ title, start: info.dateStr, allDay: info.allDay, extendedProps: { owner: currentUser } });
           save(currentUser, window.cal.getEvents());
         }
       },
