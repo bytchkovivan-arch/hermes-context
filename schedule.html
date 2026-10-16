@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Общий календарь — 4 роли</title>
+<title>Общий календарь — Иван, Марина, Оля, Аня</title>
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet'/>
 <style>
 body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; background:#f2f2f2; color:#333;}
@@ -24,22 +24,22 @@ button#loginBtn:hover {background:#162a4a;}
 <body>
 
 <div id="login-screen">
-  <h2>Вход в общий календарь (4 роли)</h2>
-  <div class="role-group">
-    <label><input type="radio" name="role" value="role1" checked> Роль 1</label>
-    <input type="password" id="pw-role1" placeholder="Пароль роли 1">
+  <h2>Вход в общий календарь</h2>
+  <div class="user-group">
+    <label><input type="radio" name="user" value="Иван" checked> Иван</label>
+    <input type="password" id="pw-Иван" placeholder="Пароль Ивана">
   </div>
-  <div class="role-group">
-    <label><input type="radio" name="role" value="role2"> Роль 2</label>
-    <input type="password" id="pw-role2" placeholder="Пароль роли 2">
+  <div class="user-group">
+    <label><input type="radio" name="user" value="Марина"> Марина</label>
+    <input type="password" id="pw-Марина" placeholder="Пароль Марины">
   </div>
-  <div class="role-group">
-    <label><input type="radio" name="role" value="role3"> Роль 3</label>
-    <input type="password" id="pw-role3" placeholder="Пароль роли 3">
+  <div class="user-group">
+    <label><input type="radio" name="user" value="Оля"> Оля</label>
+    <input type="password" id="pw-Оля" placeholder="Пароль Оли">
   </div>
-  <div class="role-group">
-    <label><input type="radio" name="role" value="role4"> Роль 4</label>
-    <input type="password" id="pw-role4" placeholder="Пароль роли 4">
+  <div class="user-group">
+    <label><input type="radio" name="user" value="Аня"> Аня</label>
+    <input type="password" id="pw-Аня" placeholder="Пароль Ань">
   </div>
   <button id="loginBtn">Войти</button>
   <p style="font-size:12px;color:#666;margin-top:10px;">Пароли по умолчанию: pass1 / pass2 / pass3 / pass4. Смените в коде страницы перед публикацией.</p>
@@ -54,30 +54,30 @@ button#loginBtn:hover {background:#162a4a;}
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 <script>
 (() => {
-  const PASSWORDS = { role1: 'pass1', role2: 'pass2', role3: 'pass3', role4: 'pass4' };
+  const PASSWORDS = { Иван: '1981', Марина: '1985', Оля: '2010', Аня: '2016' };
   const loginScreen = document.getElementById('login-screen');
   const app = document.getElementById('app');
   const logoutBtn = document.getElementById('logoutBtn');
   const loginBtn = document.getElementById('loginBtn');
-  let currentRole = null;
+  let currentUser = null;
 
-  function key(role) { return 'cal_' + role; }
+  function key(user) { return 'cal_' + user; }
 
-  function load(role) {
-    const raw = localStorage.getItem(key(role));
+  function load(user) {
+    const raw = localStorage.getItem(key(user));
     return raw ? JSON.parse(raw) : [];
   }
 
-  function save(role, evs) {
+  function save(user, evs) {
     const arr = evs.map(e => ({ title: e.title, start: e.start ? e.start.toISOString() : null, end: e.end ? e.end.toISOString() : null, allDay: e.allDay }));
-    localStorage.setItem(key(role), JSON.stringify(arr));
+    localStorage.setItem(key(user), JSON.stringify(arr));
   }
 
   loginBtn.addEventListener('click', () => {
-    const role = document.querySelector('input[name="role"]:checked').value;
-    const pw = document.getElementById('pw-' + role).value;
+    const user = document.querySelector('input[name="user"]:checked').value;
+    const pw = document.getElementById('pw-' + user).value;
     if (PASSWORDS[role] && pw === PASSWORDS[role]) {
-      currentRole = role;
+      currentUser = user;
       loginScreen.style.display = 'none';
       app.style.display = 'block';
       logoutBtn.style.display = 'inline-block';
@@ -88,7 +88,7 @@ button#loginBtn:hover {background:#162a4a;}
   });
 
   logoutBtn.addEventListener('click', () => {
-    currentRole = null;
+    currentUser = null;
     app.style.display = 'none';
     logoutBtn.style.display = 'none';
     loginScreen.style.display = 'flex';
@@ -114,7 +114,7 @@ button#loginBtn:hover {background:#162a4a;}
       selectable: true,
       selectMirror: true,
       dayMaxEvents: true,
-      events: load(currentRole).map(e => ({ ...e, allDay: e.allDay || false })),
+      events: load(currentUser).map(e => ({ ...e, allDay: e.allDay || false })),
       dateClick: info => {
         const title = prompt('Название события');
         if (title) {
