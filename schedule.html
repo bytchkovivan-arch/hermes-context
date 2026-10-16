@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Общий календарь — 4 роли</title>
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet'/>
+<style>
+body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; background:#f2f2f2; color:#333;}
+#login-screen {position:fixed; inset:0; background:#fff; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;}
+#login-screen h2 {margin-top:0; color:#1f3864;}
+.role-group {margin:12px 0;}
+.role-group label {display:block; margin:6px 0; cursor:pointer;}
+.role-group input[type="password"] {width:260px; padding:8px; margin-top:4px; border:1px solid #aaa; border-radius:4px; box-sizing:border-box;}
+button#loginBtn {margin-top:16px; padding:10px 24px; background:#1f3864; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:16px;}
+button#loginBtn:hover {background:#162a4a;}
+#app {display:none; padding:20px;}
+#calendar {max-width:1100px; margin:0 auto;}
+.logout {position:absolute; top:12px; right:20px; background:#c00000; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; z-index:50;}
+.logout:hover {background:#a00000;}
+.fc {font-family: inherit;}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <h2>Вход в общий календарь (4 роли)</h2>
+  <div class="role-group">
+    <label><input type="radio" name="role" value="role1" checked> Роль 1</label>
+    <input type="password" id="pw-role1" placeholder="Пароль роли 1">
+  </div>
+  <div class="role-group">
+    <label><input type="radio" name="role" value="role2"> Роль 2</label>
+    <input type="password" id="pw-role2" placeholder="Пароль роли 2">
+  </div>
+  <div class="role-group">
+    <label><input type="radio" name="role" value="role3"> Роль 3</label>
+    <input type="password" id="pw-role3" placeholder="Пароль роли 3">
+  </div>
+  <div class="role-group">
+    <label><input type="radio" name="role" value="role4"> Роль 4</label>
+    <input type="password" id="pw-role4" placeholder="Пароль роли 4">
+  </div>
+  <button id="loginBtn">Войти</button>
+  <p style="font-size:12px;color:#666;margin-top:10px;">Пароли по умолчанию: pass1 / pass2 / pass3 / pass4. Смените в коде страницы перед публикацией.</p>
+</div>
+
+<button id="logoutBtn" class="logout">Выйти</button>
+
+<div id="app">
+  <div id="calendar"></div>
+</div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+(() => {
+  const PASSWORDS = { role1: 'pass1', role2: 'pass2', role3: 'pass3', role4: 'pass4' };
+  const loginScreen = document.getElementById('login-screen');
+  const app = document.getElementById('app');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  let currentRole = null;
+
+  function key(role) { return 'cal_' + role; }
+
+  function load(role) {
+    const raw = localStorage.getItem(key(role));
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  function save(role, evs) {
+    const arr = evs.map(e => ({ title: e.title, start: e.start ? e.start.toISOString() : null, end: e.end ? e.end.toISOString() : null, allDay: e.allDay }));
+    localStorage.setItem(key(role), JSON.stringify(arr));
+  }
+
+  loginBtn.addEventListener('click', () => {
+    const role = document.querySelector('input[name="role"]:checked').value;
+    const pw = document.getElementById('pw-' + role).value;
+    if (PASSWORDS[role] && pw === PASSWORDS[role]) {
+      currentRole = role;
+      loginScreen.style.display = 'none';
+      app.style.display = 'block';
+      logoutBtn.style.display = 'inline-block';
+      init();
+    } else {
+      alert('Неверный пароль для выбранной роли');
+    }
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    currentRole = null;
+    app.style.display = 'none';
+    logoutBtn.style.display = 'none';
+    loginScreen.style.display = 'flex';
+    document.querySelectorAll('input[type="password"]').forEach(i => i.value = '');
+    if (window.cal) { window.cal.destroy(); window.cal = null; }
+  });
+
+  function init() {
+    const calEl = document.getElementById('calendar');
+    window.cal = new FullCalendar.Calendar(calEl, {
+      initialView: 'timeGridWeek',
+      slotMinTime: '07:00:00',
+      slotMaxTime: '20:00:00',
+      allDaySlot: false,
+      locale: 'ru',
+      localeCode: 'ru',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'timeGridWeek,timeGridDay,dayGridMonth'
+      },
+      editable: true,
+      selectable: true,
+      selectMirror: true,
+      dayMaxEvents: true,
+      events: load(currentRole).map(e => ({ ...e, allDay: e.allDay || false })),
+      dateClick: info => {
+        const title = prompt('Название события');
+        if (title) {
+          window.cal.addEvent({ title, start: info.dateStr, allDay: info.allDay });
+          save(currentRole, window.cal.getEvents());
+        }
+      },
+      eventClick: info => {
+        const t = prompt('Редактировать: ' + info.event.title, info.event.title);
+        if (t === null) return;
+        if (t.trim() === '') {
+          if (confirm('Удалить?')) { info.event.remove(); save(currentRole, window.cal.getEvents()); }
+        } else {
+          info.event.setProp('title', t);
+          save(currentRole, window.cal.getEvents());
+        }
+      },
+      eventDrop: () => save(currentRole, window.cal.getEvents()),
+      eventResize: () => save(currentRole, window.cal.getEvents())
+    });
+    window.cal.render();
+  }
+})();
+</script>
+</body>
+</html>
