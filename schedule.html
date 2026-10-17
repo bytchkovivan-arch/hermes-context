@@ -152,6 +152,14 @@ button#loginBtn:hover {background:#007e75;}
           extendedProps: { owner: e.owner ?? currentUser }
         }));
       })(),
+      eventContent: function(arg) {
+        let startStr = arg.event.start ? arg.event.start.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) : '';
+        let endStr = arg.event.end ? arg.event.end.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) : '';
+        let timeStr = startStr ? startStr + (endStr ? ' – ' + endStr : '') : '';
+        const title = document.createElement('div');
+        title.innerHTML = '<b>' + (arg.event.title || '') + '</b>' + (timeStr ? '<br><span style="font-size:11px;opacity:0.85;">' + timeStr + '</span>' : '');
+        return { domNodes: [title] };
+      },
       dateClick: info => {
         const title = prompt('Название события');
         if (title) {
