@@ -153,8 +153,10 @@ button#loginBtn:hover {background:#007e75;}
         }));
       })(),
       eventContent: function(arg) {
-        let startStr = arg.event.start ? arg.event.start.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) : '';
-        let endStr = arg.event.end ? arg.event.end.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) : '';
+        let startDate = arg.event.start instanceof Date ? arg.event.start : new Date(arg.event.start);
+        let endDate = arg.event.end instanceof Date ? arg.event.end : new Date(arg.event.end);
+        let startStr = startDate ? startDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) : '';
+        let endStr = endDate ? endDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) : '';
         let timeStr = startStr ? startStr + (endStr ? ' – ' + endStr : '') : '';
         const title = document.createElement('div');
         title.innerHTML = '<b>' + (arg.event.title || '') + '</b>' + (timeStr ? '<br><span style="font-size:11px;opacity:0.85;">' + timeStr + '</span>' : '');
@@ -162,10 +164,25 @@ button#loginBtn:hover {background:#007e75;}
       },
       dateClick: info => {
         const title = prompt('Название события');
-        if (title) {
-          window.cal.addEvent({ title, start: info.dateStr, allDay: info.allDay, extendedProps: { owner: currentUser } });
-          save(currentUser, window.cal.getEvents());
-        }
+        if (title === null) return;
+        // Ask for start and end time (HH:MM)
+        const defaultStart = info.date ? info.date.getHours() + ':' + String(info.date.getMinutes()).padStart(2,'0') : '09:00';
+        const startTime = prompt('Время начала (ЧЧ:ММ)', defaultStart);
+        if (startTime === null) return;
+        const endTime = prompt('Время окончания (ЧЧ:ММ)', (parseInt(startTime.split(':')[0])+1)+':'+startTime.split(':')[1]);
+        if (endTime === null) return;
+
+        const dateStr = info.dateStr; // YYYY-MM-DD
+        const startISO = dateStr + 'T' + startTime + ':00';
+        const endISO = dateStr + 'T' + endTime + ':00';
+
+        window.cal.addEvent({
+          title,
+          start: startISO,
+          end: endISO,
+          extendedProps: { owner: currentUser }
+        });
+        save(currentUser, window.cal.getEvents());
       },
       eventClick: info => {
         const t = prompt('Редактировать: ' + info.event.title, info.event.title);
